@@ -137,7 +137,6 @@
             >
                 @foreach ($eventos_destaques->take(7) as $evento)
                     @php
-
                         $inicio = \Carbon\Carbon::parse($evento->dataInicio);
                         $fim    = \Carbon\Carbon::parse($evento->dataFim);
                         $idioma = Session::get('idiomaAtual', 'pt');
@@ -153,21 +152,45 @@
                                 else          { $fmt1 = 'd \\d\\e F'; $fmt2 = 'd \\d\\e F \\d\\e Y'; }
                                 break;
                         }
+                        //trata nome de evento multilingue
+                        if ($evento->is_multilingual) {
+                            if ($idioma === 'en' && !empty($evento->nome_en)) {
+                                $nome = $evento->nome_en;
+                            } elseif ($idioma === 'es' && !empty($evento->nome_es)) {
+                                $nome = $evento->nome_es;
+                            } else {
+                                $nome = $evento->nome;
+                            }
+                        } else {
+                            $nome = $evento->nome;
+                        }
                     @endphp
 
                     <div class="carousel-cell-images">
                         @php
+                        //trata nome de evento multilingue
+                        if ($evento->is_multilingual) {
+                            if ($idioma === 'en' && !empty($evento->fotoEvento_en)) {
+                                $img = $evento->fotoEvento_en;
+                            } elseif ($idioma === 'es' && !empty($evento->fotoEvento_es)) {
+                                $img = $evento->fotoEvento_es;
+                            } else {
+                                $img = $evento->fotoEvento;
+                            }
+                        } else {
+                            $img = $evento->fotoEvento;
+                        }
 
-                            $imgUrl = $evento->fotoEvento
-                                ? Storage::url($evento->fotoEvento)
-                                : asset('img/fundo-vagalumes.png');
-                        @endphp
+                        $imgUrl = $img
+                            ? Storage::url($img)
+                            : asset('img/fundo-vagalumes.png');
+                    @endphp
 
                         <div class="img-wrapper">
                             <a href="{{ route('evento.visualizar', $evento->id) }}">
                                 <img
                                     src="{{ $imgUrl }}"
-                                    alt="{{ $evento->nome }}"
+                                    alt="{{ $nome }}"
                                     class="img-fixed"
                                 >
                             </a>
@@ -175,7 +198,7 @@
 
                         <div class="card-text mt-2">
                             <h5 class="tit-carrossel-home text-dark">
-                                {{ $evento->nome }}
+                                {{ $nome }}
                             </h5>
                             <p class="sub-carrossel-home mb-0">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
